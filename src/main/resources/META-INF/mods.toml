@@ -1,0 +1,29 @@
+modLoader="javafml" #mandatory
+loaderVersion="[44,)" #mandatory
+license="All rights reserved"
+[[mods]] #mandatory
+modId="zomsurvival" #mandatory
+version="${file.jarVersion}" #mandatory
+displayName="Zombie Survival" #mandatory
+displayURL="https://cafe.naver.com/minecraftgame/1873615" #optional
+logoFile="zomsurvival.png" #optional
+credits="아이디어 제공 - 강강술래03님" #optional
+authors="reasure" #optional
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+날이 늘어날 수록 더 많은 좀비가 스폰되며 좀비들이 똑똑해진다.
+과연 이런 상황에서 플레이어는 무사히 생존할 수 있을까?
+'''
+[[dependencies.zomsurvival]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[44,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.zomsurvival]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19.3,1.20)"
+    ordering="NONE"
+    side="BOTH"
