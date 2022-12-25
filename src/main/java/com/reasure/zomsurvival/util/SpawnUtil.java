@@ -79,7 +79,6 @@ public class SpawnUtil {
                     ++spawnPackSize;
                     ++spawnGroupSize;
                     level.addFreshEntityWithPassengers(zombie);
-                    LOGGER.info("spawn zombie");
                     if (spawnPackSize >= ForgeEventFactory.getMaxSpawnPackSize(zombie)) return;
                     if (zombie.isMaxGroupSizeReached(spawnGroupSize)) break;
                 }
