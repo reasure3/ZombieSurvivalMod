@@ -5,6 +5,7 @@ license="All rights reserved"
 modId="zomsurvival" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Zombie Survival" #mandatory
+updateJSONURL="https://github.com/reasure3/ZombieSurvivalMod/blob/master/versionchecker.json" #optional
 displayURL="https://cafe.naver.com/minecraftgame/1873615" #optional
 logoFile="zomsurvival.png" #optional
 credits="아이디어 제공 - 강강술래03님" #optional

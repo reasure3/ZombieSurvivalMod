@@ -1,0 +1,11 @@
+{
+  "homepage": "https://cafe.naver.com/minecraftgame/1873615",
+  "1.19.3": {
+    "0.2-mc1.19.3-forge": "1. add config files 2. sometimes villager zombie spawns",
+    "0.1-mc1.19.3-forge": "first version"
+  },
+  "promos": {
+    "1.19.3-latest": "0.2-mc1.19.3-forge",
+    "1.19.3-recommended": "0.2-mc1.19.3-forge"
+  }
+}
