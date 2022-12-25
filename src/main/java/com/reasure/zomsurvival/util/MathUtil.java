@@ -17,4 +17,8 @@ public class MathUtil {
             case UNIFORM -> random.nextIntBetweenInclusive(-5, 5);
         };
     }
+
+    public static boolean nextZombieVillager(RandomSource random) {
+        return random.nextInt(10) == 0;
+    }
 }
