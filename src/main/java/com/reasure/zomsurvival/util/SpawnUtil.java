@@ -154,7 +154,8 @@ public class SpawnUtil {
     @Nullable
     private static Zombie getZombieForSpawn(ServerLevel level) {
         try {
-            Entity entity = EntityType.ZOMBIE.create(level);
+            Entity entity = MathUtil.nextZombieVillager(level.random) ?
+                    EntityType.ZOMBIE.create(level) : EntityType.ZOMBIE_VILLAGER.create(level);
             if (entity instanceof Zombie zombie) {
                 return zombie;
             }
