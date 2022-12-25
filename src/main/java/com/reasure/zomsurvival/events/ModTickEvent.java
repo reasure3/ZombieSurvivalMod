@@ -20,6 +20,7 @@ public class ModTickEvent {
     public static void onTick(final TickEvent.LevelTickEvent event) {
         if (event.level instanceof ServerLevel server) {
             boolean isRaining = server.isRaining();
+            int day = ((int) (server.getDayTime() / 24000L)) * 10;
             int time = (int) (server.getDayTime() % 24000L);
             int startTime = isRaining ? 12969 : 13188;
             int endTime = isRaining ? 23031 : 22812;
@@ -27,7 +28,7 @@ public class ModTickEvent {
             if (time >= startTime && time < endTime) {
                 List<ServerPlayer> players = server.getPlayers((p -> (!p.isCreative() && !p.isSpectator()) && p.level == server));
                 for (ServerPlayer player : players) {
-                    SpawnUtil.spawnZombie(server, server.getChunk(player.blockPosition()));
+                    SpawnUtil.spawnZombie(server, server.getChunk(player.blockPosition()), day);
                 }
             }
         }

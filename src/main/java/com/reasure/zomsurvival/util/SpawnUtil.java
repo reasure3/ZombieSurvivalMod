@@ -30,15 +30,15 @@ import javax.annotation.Nullable;
 public class SpawnUtil {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void spawnZombie(ServerLevel level, ChunkAccess chunk) {
+    public static void spawnZombie(ServerLevel level, ChunkAccess chunk, int day) {
         int minY = level.getMinBuildHeight();
         BlockPos pos = getRandomPosWithin(level, chunk, minY);
         if (pos.getY() > minY) {
-            spawnZombie(level, chunk, pos);
+            spawnZombie(level, chunk, pos, day);
         }
     }
 
-    public static void spawnZombie(ServerLevel level, ChunkAccess chunk, BlockPos pos) {
+    public static void spawnZombie(ServerLevel level, ChunkAccess chunk, BlockPos pos, int day) {
         int posY = pos.getY();
         BlockState block = chunk.getBlockState(pos);
         if (block.isRedstoneConductor(chunk, pos)) return;
@@ -50,12 +50,12 @@ public class SpawnUtil {
             int posX = pos.getX();
             int posZ = pos.getZ();
             SpawnGroupData spawnGroupData = null;
-            int spawnCount = ((int) (level.getDayTime() / 24000L)) * 10;
+            int spawnCount = MathUtil.getSpawnCount(day, level.random);
             int spawnGroupSize = 0;
 
             for (int j = 0; j < spawnCount; j++) {
-                posX += level.random.nextIntBetweenInclusive(-5, 5);
-                posZ += level.random.nextIntBetweenInclusive(-5, 5);
+                posX += MathUtil.nextCoord(level.random);
+                posZ += MathUtil.nextCoord(level.random);
                 mPos.set(posX, posY, posZ);
                 double centerX = (double) posX + 0.5d;
                 double centerZ = (double) posZ + 0.5d;
