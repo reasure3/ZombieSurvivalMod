@@ -32,20 +32,21 @@ public class ModLoggedInEvent {
             LOGGER.info("changes: {}", result.changes());
             LOGGER.info("target: {}", result.target());
             LOGGER.info("url: {}", result.url());
-            Component downloadComponent = Component.literal(" [download]").withStyle(Style.EMPTY
-                    .withColor(ChatFormatting.AQUA)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, result.url()))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(result.url())))
-            );
-
-            Component changelogComponent = Component.literal(" [changes]").withStyle(Style.EMPTY
-                    .withItalic(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tellraw @s \"[Zombie Survivor "
-                            + result.target() + " Changelogs]\\n" + changes.replace("\n", "\\n") + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view changelog")))
-            );
 
             if (result.status() == VersionChecker.Status.OUTDATED || result.status() == VersionChecker.Status.BETA_OUTDATED) {
+                Component downloadComponent = Component.literal(" [download]").withStyle(Style.EMPTY
+                        .withColor(ChatFormatting.AQUA)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, result.url()))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(result.url())))
+                );
+
+                Component changelogComponent = Component.literal(" [changes]").withStyle(Style.EMPTY
+                        .withItalic(true)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tellraw @s \"[Zombie Survivor "
+                                + result.target() + " Changelogs]\\n" + changes.replace("\n", "\\n") + "\""))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view changelog")))
+                );
+
                 player.displayClientMessage(
                         Component.literal("[Zombie Survivor] There is new version: " + result.target())
                                 .append(downloadComponent)

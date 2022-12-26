@@ -5,6 +5,7 @@ import com.reasure.zomsurvival.ZomSurvival;
 import com.reasure.zomsurvival.util.SpawnUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +20,8 @@ public class ModTickEvent {
     @SubscribeEvent
     public static void onTick(final TickEvent.LevelTickEvent event) {
         if (event.level instanceof ServerLevel server) {
+            if (server.isDebug()) return;;
+
             boolean isRaining = server.isRaining();
             int day = ((int) (server.getDayTime() / 24000L)) * 10;
             int time = (int) (server.getDayTime() % 24000L);
@@ -26,7 +29,7 @@ public class ModTickEvent {
             int endTime = isRaining ? 23031 : 22812;
 
             if (time >= startTime && time < endTime) {
-                List<ServerPlayer> players = server.getPlayers((p -> (!p.isCreative() && !p.isSpectator()) && p.level == server));
+                List<ServerPlayer> players = server.getPlayers(p -> p.isAlive() && !p.isSpectator());
                 for (ServerPlayer player : players) {
                     SpawnUtil.spawnZombie(server, server.getChunk(player.blockPosition()), day);
                 }
