@@ -1,7 +1,7 @@
 {
   "homepage": "https://cafe.naver.com/minecraftgame/1873615",
   "promos": {
-    "1.19.3-latest": "0.2",
-    "1.19.3-recommended": "0.2"
+    "1.19.3-latest": "zomsurvival-0.2-mc1.19.3-forge",
+    "1.19.3-recommended": "zomsurvival-0.1-mc1.19.3-forge"
   }
 }
