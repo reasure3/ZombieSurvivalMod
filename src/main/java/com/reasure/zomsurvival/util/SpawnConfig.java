@@ -21,6 +21,9 @@ public class SpawnConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> SPIDER_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> WITCH_SPAWN_WEIGHT;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> ZOMBIE_FOLLOWING_RANGE_MODIFIER;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ZOMBIE_ADD_FOLLOWING_RANGE_DAY;
+
     static {
         BUILDER.push("Configs for Zombie Survivor mod");
 
@@ -63,6 +66,12 @@ public class SpawnConfig {
 
         WITCH_SPAWN_WEIGHT = BUILDER.comment("마녀 스폰 가중치 (스폰 조건이 맞아야 스폰됨.)")
                 .define("Witch Spawn Weight", 0);
+
+        ZOMBIE_FOLLOWING_RANGE_MODIFIER = BUILDER.comment("강화할 좀비 인식 사거리")
+                        .define("Zombie Following Range Adder", 200.0D);
+
+        ZOMBIE_ADD_FOLLOWING_RANGE_DAY = BUILDER.comment("좀비 인식 사거리 강화를 시작할 일 수")
+                        .define("Zombie Add Following Range Day", 0);
 
         BUILDER.pop();
         SPEC = BUILDER.build();

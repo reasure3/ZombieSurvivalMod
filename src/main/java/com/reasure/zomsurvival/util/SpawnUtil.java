@@ -1,13 +1,16 @@
 package com.reasure.zomsurvival.util;
 
 import com.mojang.logging.LogUtils;
+import com.reasure.zomsurvival.entity.goal.target.NearestAttackableTargetWithRangeGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
@@ -70,6 +73,7 @@ public class SpawnUtil {
 
                 Monster monster = getMonsterForSpawn(level, type);
                 if (monster == null) continue;
+                reinforceMonster(level, monster, day);
 
                 monster.moveTo(centerX, posY, centerZ, level.random.nextFloat() * 360.0f, 0.0f);
                 Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, centerX, posY, centerZ, null, MobSpawnType.NATURAL);
@@ -82,6 +86,18 @@ public class SpawnUtil {
                     level.addFreshEntityWithPassengers(monster);
                     if (spawnPackSize >= ForgeEventFactory.getMaxSpawnPackSize(monster)) continue;
                 }
+            }
+        }
+    }
+
+    private static void reinforceMonster(ServerLevel level, Monster monster, int day) {
+        if (monster instanceof Zombie zombie) {
+            if (day >= SpawnConfig.ZOMBIE_ADD_FOLLOWING_RANGE_DAY.get()) {
+                zombie.targetSelector.removeAllGoals(goal ->
+                        goal instanceof NearestAttackableTargetGoal<?> targetGoal
+                                && targetGoal.targetType == Player.class);
+                zombie.targetSelector.addGoal(2,
+                        new NearestAttackableTargetWithRangeGoal<>(zombie, Player.class, SpawnConfig.ZOMBIE_FOLLOWING_RANGE_MODIFIER.get()));
             }
         }
     }
