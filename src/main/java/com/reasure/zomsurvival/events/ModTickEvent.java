@@ -5,7 +5,6 @@ import com.reasure.zomsurvival.ZomSurvival;
 import com.reasure.zomsurvival.util.SpawnUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -31,7 +30,7 @@ public class ModTickEvent {
             if (time >= startTime && time < endTime) {
                 List<ServerPlayer> players = server.getPlayers(p -> p.isAlive() && !p.isSpectator());
                 for (ServerPlayer player : players) {
-                    SpawnUtil.spawnZombie(server, server.getChunk(player.blockPosition()), day);
+                    SpawnUtil.spawnMonster(server, server.getChunk(player.blockPosition()), day);
                 }
             }
         }

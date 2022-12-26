@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
@@ -30,15 +30,15 @@ import javax.annotation.Nullable;
 public class SpawnUtil {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void spawnZombie(ServerLevel level, ChunkAccess chunk, int day) {
+    public static void spawnMonster(ServerLevel level, ChunkAccess chunk, int day) {
         int minY = level.getMinBuildHeight();
         BlockPos pos = getRandomPosWithin(level, chunk, minY);
         if (pos.getY() > minY) {
-            spawnZombie(level, chunk, pos, day);
+            spawnMonster(level, chunk, pos, day);
         }
     }
 
-    public static void spawnZombie(ServerLevel level, ChunkAccess chunk, BlockPos pos, int day) {
+    public static void spawnMonster(ServerLevel level, ChunkAccess chunk, BlockPos pos, int day) {
         int posY = pos.getY();
         BlockState block = chunk.getBlockState(pos);
         if (block.isRedstoneConductor(chunk, pos)) return;
@@ -51,7 +51,6 @@ public class SpawnUtil {
             int posZ = pos.getZ();
             SpawnGroupData spawnGroupData = null;
             int spawnCount = MathUtil.getSpawnCount(day, level.random);
-            int spawnGroupSize = 0;
 
             for (int j = 0; j < spawnCount; j++) {
                 posX += MathUtil.nextCoord(level.random);
@@ -64,23 +63,24 @@ public class SpawnUtil {
 
                 double distanceToPlayer = player.distanceToSqr(centerX, posY, centerZ);
                 if (!isRightDistanceToPlayerAndSpawnPoint(level, chunk, mPos, distanceToPlayer)) continue;
-                if (!isValidSpawnPositionForZombie(level, mPos, distanceToPlayer)) continue;
 
-                Zombie zombie = getZombieForSpawn(level);
-                if (zombie == null) continue;
+                EntityType<? extends Monster> type = MathUtil.nextMonster(level.random);
 
-                zombie.moveTo(centerX, posY, centerZ, level.random.nextFloat() * 360.0f, 0.0f);
-                Event.Result res = ForgeEventFactory.canEntitySpawn(zombie, level, centerX, posY, centerZ, null, MobSpawnType.NATURAL);
+                if (!isValidSpawnPositionForMonster(level, mPos, distanceToPlayer, type)) continue;
+
+                Monster monster = getMonsterForSpawn(level, type);
+                if (monster == null) continue;
+
+                monster.moveTo(centerX, posY, centerZ, level.random.nextFloat() * 360.0f, 0.0f);
+                Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, centerX, posY, centerZ, null, MobSpawnType.NATURAL);
                 if (res == Event.Result.DENY) continue;
-                if (res == Event.Result.ALLOW || isValidPositionForZombie(level, zombie, distanceToPlayer)) {
-                    if (!ForgeEventFactory.doSpecialSpawn(zombie, level, (float) centerX, (float) posY, (float) centerZ, null, MobSpawnType.NATURAL)) {
-                        spawnGroupData = zombie.finalizeSpawn(level, level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
+                if (res == Event.Result.ALLOW || isValidPositionForMonster(level, monster, distanceToPlayer)) {
+                    if (!ForgeEventFactory.doSpecialSpawn(monster, level, (float) centerX, (float) posY, (float) centerZ, null, MobSpawnType.NATURAL)) {
+                        spawnGroupData = monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
                     }
                     ++spawnPackSize;
-                    ++spawnGroupSize;
-                    level.addFreshEntityWithPassengers(zombie);
-                    if (spawnPackSize >= ForgeEventFactory.getMaxSpawnPackSize(zombie)) return;
-                    if (zombie.isMaxGroupSizeReached(spawnGroupSize)) break;
+                    level.addFreshEntityWithPassengers(monster);
+                    if (spawnPackSize >= ForgeEventFactory.getMaxSpawnPackSize(monster)) continue;
                 }
             }
         }
@@ -102,30 +102,29 @@ public class SpawnUtil {
         return chunk.getPos().equals(new ChunkPos(pos)) || level.isNaturalSpawningAllowed(pos);
     }
 
-    private static boolean isValidSpawnPositionForZombie(ServerLevel level, BlockPos.MutableBlockPos pos, double distance) {
-        EntityType<Zombie> zombie = EntityType.ZOMBIE;
-        double despawnDistance = zombie.getCategory().getDespawnDistance();
-        if (!zombie.canSpawnFarFromPlayer() && distance > despawnDistance * despawnDistance)
+    private static boolean isValidSpawnPositionForMonster(ServerLevel level, BlockPos.MutableBlockPos pos, double distance, EntityType<? extends Monster> type) {
+        double despawnDistance = type.getCategory().getDespawnDistance();
+        if (!type.canSpawnFarFromPlayer() && distance > despawnDistance * despawnDistance)
             return false;
 
-        if (zombie.canSummon() && canSpawnZombieAt(level, pos)) {
-            SpawnPlacements.Type placementType = SpawnPlacements.getPlacementType(zombie);
-            if (!NaturalSpawner.isSpawnPositionOk(placementType, level, pos, zombie)) return false;
-            if (!SpawnPlacements.checkSpawnRules(zombie, level, MobSpawnType.NATURAL, pos, level.random)) return false;
-            return level.noCollision(zombie.getAABB((double) pos.getX() + 0.5d, pos.getY(), (double) pos.getZ() + 0.5d));
+        if (type.canSummon() && canSpawnMonsterAt(level, pos, type)) {
+            SpawnPlacements.Type placementType = SpawnPlacements.getPlacementType(type);
+            if (!NaturalSpawner.isSpawnPositionOk(placementType, level, pos, type)) return false;
+            if (!SpawnPlacements.checkSpawnRules(type, level, MobSpawnType.NATURAL, pos, level.random)) return false;
+            return level.noCollision(type.getAABB((double) pos.getX() + 0.5d, pos.getY(), (double) pos.getZ() + 0.5d));
         }
         return false;
     }
 
-    private static boolean isValidPositionForZombie(ServerLevel level, Zombie zombie, double distance) {
+    private static boolean isValidPositionForMonster(ServerLevel level, Monster monster, double distance) {
         double despawnDistance = MobCategory.MONSTER.getDespawnDistance();
-        if (distance > despawnDistance * despawnDistance && zombie.removeWhenFarAway(distance))
+        if (distance > despawnDistance * despawnDistance && monster.removeWhenFarAway(distance))
             return false;
 
-        return zombie.checkSpawnRules(level, MobSpawnType.NATURAL) && zombie.checkSpawnObstruction(level);
+        return monster.checkSpawnRules(level, MobSpawnType.NATURAL) && monster.checkSpawnObstruction(level);
     }
 
-    private static boolean canSpawnZombieAt(ServerLevel level, BlockPos pos) {
+    private static boolean canSpawnMonsterAt(ServerLevel level, BlockPos pos, EntityType<? extends Monster> type) {
         StructureManager structureManager = level.structureManager();
         ChunkGenerator chunkGenerator = level.getChunkSource().getGenerator();
 
@@ -137,7 +136,7 @@ public class SpawnUtil {
                 ForgeEventFactory.getPotentialSpawns(level, MobCategory.MONSTER, pos, data);
 
         for (MobSpawnSettings.SpawnerData d : possibleData.unwrap()) {
-            if (d.type == EntityType.ZOMBIE) return true;
+            if (d.type == type) return true;
         }
         return false;
     }
@@ -151,16 +150,15 @@ public class SpawnUtil {
     }
 
     @Nullable
-    private static Zombie getZombieForSpawn(ServerLevel level) {
+    private static Monster getMonsterForSpawn(ServerLevel level, EntityType<? extends Monster> type) {
         try {
-            Entity entity = MathUtil.nextZombieVillager(level.random) ?
-                    EntityType.ZOMBIE_VILLAGER.create(level) : EntityType.ZOMBIE.create(level);
-            if (entity instanceof Zombie zombie) {
-                return zombie;
+            Entity entity = type.create(level);
+            if (entity instanceof Monster monster) {
+                return monster;
             }
-            LOGGER.warn("Can't spawn zombie");
+            LOGGER.warn("Can't spawn {}", type);
         } catch (Exception exception) {
-            LOGGER.warn("Failed to create zombie", exception);
+            LOGGER.warn("Failed to create " + type, exception);
         }
         return null;
     }

@@ -24,3 +24,6 @@ version: 0.2
   * `TRIANGLE`: rand(0 ~ 5) - rand(0 ~ 5): -5 ~ 5 중에서 0이 나올 확률이 높음. 바닐라 마크 방식
   * `UNIFORM`: rand(-5 ~ 5): -5 ~ 5가 골고루 나옴.
   * 기본값: TRIANGLE
+
+
+* **??? Spawn Weight**: 해당 몬스터의 스폰 비율 가중치를 설정합니다.
