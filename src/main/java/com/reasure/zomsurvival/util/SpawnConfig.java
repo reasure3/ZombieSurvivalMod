@@ -20,7 +20,7 @@ public class SpawnConfig {
                 .defineEnum("Spawn Count Type", ModEnums.SpawnCountType.DEFAULT);
 
         SPAWN_INCREASE_AMOUNT = BUILDER.comment("날이 지날 때, 증가되는 좀비 스폰 량")
-                .defineInRange("Spawn Increase Amount", 10, 0, 10000);
+                .defineInRange("Spawn Increase Amount", 50, 0, 10000);
 
         RANDOM_COORD_TYPE = BUILDER.comment("각 기준 좌표에서 랜덤 좌표를 설정 방법. 기준 좌표의 x, z 좌표에 해당 수식으로 나온 값을 더함.")
                 .comment("TRIANGLE: rand(0 ~ 5) - rand(0 ~ 5): -5 ~ 5 중에서 0이 나올 확률이 높음. 마크 바닐라 방식")

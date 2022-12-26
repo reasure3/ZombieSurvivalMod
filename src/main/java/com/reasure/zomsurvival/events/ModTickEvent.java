@@ -23,7 +23,7 @@ public class ModTickEvent {
             if (server.isDebug()) return;;
 
             boolean isRaining = server.isRaining();
-            int day = ((int) (server.getDayTime() / 24000L)) * 10;
+            int day = (int) (server.getDayTime() / 24000L);
             int time = (int) (server.getDayTime() % 24000L);
             int startTime = isRaining ? 12969 : 13188;
             int endTime = isRaining ? 23031 : 22812;
