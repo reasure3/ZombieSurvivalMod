@@ -13,3 +13,4 @@
         -- Spawn Increase Amount: 날이 지날 때, 증가되는 좀비 스폰 량 (0 ~ 10000) 기본값: 10
         -- Random Coord Type: 각 기준 좌표에서 랜덤 좌표를 설정 방법 (TRIANGLE, UNIFORM) 기본값: TRIANGLE
         이제 가끔씩 주민 좀비가 스폰됩니다.
+ - 0.2.1: 모드 업데이트 체크 기능 추가
