@@ -3,8 +3,12 @@ package com.reasure.zomsurvival.events;
 import com.mojang.logging.LogUtils;
 import com.reasure.zomsurvival.ZomSurvival;
 import com.reasure.zomsurvival.util.SpawnUtil;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +32,7 @@ public class ModTickEvent {
             int endTime = isRaining ? 23031 : 22812;
 
             if (time >= startTime && time < endTime) {
+
                 List<ServerPlayer> players = server.getPlayers(p -> p.isAlive() && !p.isSpectator());
                 for (ServerPlayer player : players) {
                     SpawnUtil.spawnMonster(server, server.getChunk(player.blockPosition()), day);

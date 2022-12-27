@@ -11,7 +11,7 @@ version: 0.2
 ## 설정 파일
 * **Spawn Count Type**: 좌표 별 좀비 스폰 시도 횟수 설정 방법
   * `DEFAULT`: 3 * spawn increase amount * 일수
-  * `RANDOM`: rand(0 ~ 3 * spawn increase amount * 일수)
+  * `RANDOM`: rand(0 ~ spawn increase amount * 일수)
   * 기본값: DEFAULT
 
 
