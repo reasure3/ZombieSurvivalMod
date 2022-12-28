@@ -24,6 +24,11 @@ public class SpawnConfig {
     public static final ForgeConfigSpec.ConfigValue<Double> ZOMBIE_FOLLOWING_RANGE_MODIFIER;
     public static final ForgeConfigSpec.ConfigValue<Integer> ZOMBIE_ADD_FOLLOWING_RANGE_DAY;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> ZOMBIE_SPEED_ADDER;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ZOMBIE_SPEED_UP_PER_DAY;
+
+    public static final ForgeConfigSpec.ConfigValue<Double> ZOMBIE_MAX_SPEED_ADDER;
+
     static {
         BUILDER.push("Configs for Zombie Survivor mod");
 
@@ -68,10 +73,21 @@ public class SpawnConfig {
                 .define("Witch Spawn Weight", 0);
 
         ZOMBIE_FOLLOWING_RANGE_MODIFIER = BUILDER.comment("강화할 좀비 인식 사거리")
-                        .define("Zombie Following Range Adder", 200.0D);
+                .define("Zombie Following Range Adder", 200.0D);
 
         ZOMBIE_ADD_FOLLOWING_RANGE_DAY = BUILDER.comment("좀비 인식 사거리 강화를 시작할 일 수")
-                        .define("Zombie Add Following Range Day", 0);
+                .define("Zombie Add Following Range Day", 0);
+
+        ZOMBIE_SPEED_ADDER = BUILDER.comment("Zombie Speed Up Per Day 마다 강화될 속도 (바닐라에서 좀비의 기본 속도는 0.23)")
+                .comment("Ex) Zombie Speed Up Per Day가 5일 이고, Zombie Speed Adder가 0.1이고, 현재 15일 일경우, 0.23 + 0.23 * 0.1배 * 3일")
+                .comment("즉, 기존 속도의 0.1배, 0.2배, 0.3배, ... 가 더해지는 식으로 강화됨.")
+                .defineInRange("Zombie Speed Adder", 0.3D, 0.0D, 10.0D);
+
+        ZOMBIE_SPEED_UP_PER_DAY = BUILDER.comment("해당 일 수마다 좀비 속도가 강화됨.")
+                .define("Zombie Speed Up Per Day", 5);
+
+        ZOMBIE_MAX_SPEED_ADDER = BUILDER.comment("좀비의 기본 속도에서 최대 몇배까지 더할지 설정")
+                .defineInRange("Zombie Max Speed Adder", 10.D, 0.0D, 100.0D);
 
         BUILDER.pop();
         SPEC = BUILDER.build();

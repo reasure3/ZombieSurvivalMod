@@ -72,7 +72,6 @@ public class SpawnUtil {
             Monster monster = getMonsterForSpawn(level, type);
             if (monster == null) continue;
             reinforceMonster(level, monster, day);
-            monster.addEffect(new MobEffectInstance(MobEffects.GLOWING, 99999));
 
             monster.moveTo(centerX, posY, centerZ, level.random.nextFloat() * 360.0f, 0.0f);
             Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, centerX, posY, centerZ, null, MobSpawnType.NATURAL);
@@ -95,6 +94,7 @@ public class SpawnUtil {
                 zombie.targetSelector.addGoal(2,
                         new NearestAttackableTargetWithRangeGoal<>(zombie, Player.class, SpawnConfig.ZOMBIE_FOLLOWING_RANGE_MODIFIER.get()));
             }
+            AttributeUtil.reinforceZombieSpeed(zombie, day);
         }
     }
 
