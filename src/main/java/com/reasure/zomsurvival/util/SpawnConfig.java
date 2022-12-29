@@ -14,9 +14,9 @@ public class SpawnConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> ZOMBIE_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> ZOMBIE_VILLAGER_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> HUSK_SPAWN_WEIGHT;
-    public static final ForgeConfigSpec.ConfigValue<Integer> STRAY_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> DROWNED_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> SKELETON_SPAWN_WEIGHT;
+    public static final ForgeConfigSpec.ConfigValue<Integer> STRAY_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> CREEPER_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> SPIDER_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> WITCH_SPAWN_WEIGHT;
@@ -54,14 +54,14 @@ public class SpawnConfig {
         HUSK_SPAWN_WEIGHT = BUILDER.comment("허스크 스폰 가중치")
                 .define("Husk Spawn Weight", 250);
 
-        STRAY_SPAWN_WEIGHT = BUILDER.comment("스트레이 스폰 가중치")
-                .define("Stray Spawn Weight", 0);
-
         DROWNED_SPAWN_WEIGHT = BUILDER.comment("드라운드 스폰 가중치")
                 .define("Drowned Spawn Weidht", 350);
 
         SKELETON_SPAWN_WEIGHT = BUILDER.comment("스켈레톤 스폰 가중치")
                 .define("Skeleton Spawn Weight", 0);
+
+        STRAY_SPAWN_WEIGHT = BUILDER.comment("스트레이 스폰 가중치")
+                .define("Stray Spawn Weight", 0);
 
         CREEPER_SPAWN_WEIGHT = BUILDER.comment("크리퍼 스폰 가중치")
                 .define("Creeper Spawn Weight", 0);

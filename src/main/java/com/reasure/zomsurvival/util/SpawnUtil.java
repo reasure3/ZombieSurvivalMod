@@ -1,22 +1,15 @@
 package com.reasure.zomsurvival.util;
 
 import com.mojang.logging.LogUtils;
-import com.reasure.zomsurvival.entity.goal.target.NearestAttackableTargetWithRangeGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.Event;
@@ -31,7 +24,7 @@ public class SpawnUtil {
 
     public static void spawnMonster(ServerLevel level, ChunkAccess chunk, int day) {
         int minY = level.getMinBuildHeight();
-        BlockPos pos = getRandomPosWithin(level, chunk, minY);
+        BlockPos pos = MathUtil.getRandomPosWithin(level.random, chunk, minY);
         if (pos.getY() > minY) {
             spawnMonster(level, chunk, pos, day);
         }
@@ -49,8 +42,8 @@ public class SpawnUtil {
         if (player == null) return;
 
         int spawnCount = MathUtil.getSpawnCount(day, level.random);
+        SpawnGroupData spawnGroupData = null;
         for (int i = 0; i < spawnCount; i++) {
-            SpawnGroupData spawnGroupData = null;
 
             if (level.random.nextInt(10) < 3) {
                 posX = pos.getX();
@@ -71,40 +64,22 @@ public class SpawnUtil {
 
             Monster monster = getMonsterForSpawn(level, type);
             if (monster == null) continue;
-            reinforceMonster(level, monster, day);
-
-            monster.moveTo(centerX, posY, centerZ, level.random.nextFloat() * 360.0f, 0.0f);
-            Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, centerX, posY, centerZ, null, MobSpawnType.NATURAL);
-            if (res == Event.Result.DENY) continue;
-            if (res == Event.Result.ALLOW || (monster.checkSpawnRules(level, MobSpawnType.NATURAL) && monster.checkSpawnObstruction(level))) {
-                if (!ForgeEventFactory.doSpecialSpawn(monster, level, (float) centerX, (float) posY, (float) centerZ, null, MobSpawnType.NATURAL)) {
-                    spawnGroupData = monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
-                }
-                level.addFreshEntityWithPassengers(monster);
-            }
+            spawnGroupData = finalizeSpawn(level, centerX, posY, centerZ, day, spawnGroupData, monster, MobSpawnType.NATURAL);
         }
     }
 
-    private static void reinforceMonster(ServerLevel level, Monster monster, int day) {
-        if (monster instanceof Zombie zombie) {
-            if (day >= SpawnConfig.ZOMBIE_ADD_FOLLOWING_RANGE_DAY.get()) {
-                zombie.targetSelector.removeAllGoals(goal ->
-                        goal instanceof NearestAttackableTargetGoal<?> targetGoal
-                                && targetGoal.targetType == Player.class);
-                zombie.targetSelector.addGoal(2,
-                        new NearestAttackableTargetWithRangeGoal<>(zombie, Player.class, SpawnConfig.ZOMBIE_FOLLOWING_RANGE_MODIFIER.get()));
+    public static SpawnGroupData finalizeSpawn(ServerLevel level, double x, double y, double z, int day, SpawnGroupData spawnGroupData, Monster monster, MobSpawnType type) {
+        MonsterUtil.reinforceMonster(level, monster, day);
+        monster.moveTo(x, y, z, level.random.nextFloat() * 360.0f, 0.0f);
+        Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, x, y, z, null, type);
+        if (res == Event.Result.DENY) return spawnGroupData;
+        if (res == Event.Result.ALLOW || (monster.checkSpawnRules(level, type) && monster.checkSpawnObstruction(level))) {
+            if (!ForgeEventFactory.doSpecialSpawn(monster, level, (float) x, (float) y, (float) z, null, type)) {
+                spawnGroupData = monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), type, spawnGroupData, null);
             }
-            AttributeUtil.reinforceZombieSpeed(zombie, day);
+            level.addFreshEntityWithPassengers(monster);
         }
-    }
-
-    private static BlockPos getRandomPosWithin(ServerLevel level, ChunkAccess chunk, int minY) {
-        ChunkPos chunkpos = chunk.getPos();
-        int posX = chunkpos.getMinBlockX() + level.random.nextInt(16);
-        int posZ = chunkpos.getMinBlockZ() + level.random.nextInt(16);
-        int maxY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE, posX, posZ) + 1;
-        int posY = Mth.randomBetweenInclusive(level.random, minY, maxY);
-        return new BlockPos(posX, posY, posZ);
+        return spawnGroupData;
     }
 
     private static boolean isRightDistanceToPlayerAndSpawnPoint(ServerLevel level, ChunkAccess chunk, BlockPos.MutableBlockPos pos, double distanceSqr) {
@@ -125,7 +100,7 @@ public class SpawnUtil {
     }
 
     @Nullable
-    private static Monster getMonsterForSpawn(ServerLevel level, EntityType<? extends Monster> type) {
+    public static Monster getMonsterForSpawn(ServerLevel level, EntityType<? extends Monster> type) {
         try {
             Entity entity = type.create(level);
             if (entity instanceof Monster monster) {
