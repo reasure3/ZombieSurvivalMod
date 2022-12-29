@@ -2,22 +2,26 @@ package com.reasure.zomsurvival.events;
 
 import com.mojang.logging.LogUtils;
 import com.reasure.zomsurvival.ZomSurvival;
+import com.reasure.zomsurvival.command.DaytimeCommand;
+import com.reasure.zomsurvival.command.SpawnMonsterCommand;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.server.command.ConfigCommand;
 import org.slf4j.Logger;
 
 @Mod.EventBusSubscriber(modid = ZomSurvival.MODID)
-public class ModLoggedInEvent {
+public class ModEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @SubscribeEvent
@@ -54,5 +58,13 @@ public class ModLoggedInEvent {
                         false);
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onCommandRegister(final RegisterCommandsEvent event) {
+        new SpawnMonsterCommand(event.getDispatcher());
+        new DaytimeCommand(event.getDispatcher());
+
+        ConfigCommand.register(event.getDispatcher());
     }
 }
