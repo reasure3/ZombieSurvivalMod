@@ -66,4 +66,8 @@ public class MathUtil {
     public static long dayToDaytime(int day, int time) {
         return (long) day * 24000L + (long) time;
     }
+
+    public static int pow(int a) {
+        return a * a;
+    }
 }

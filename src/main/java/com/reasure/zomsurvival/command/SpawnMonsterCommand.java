@@ -2,7 +2,6 @@ package com.reasure.zomsurvival.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.reasure.zomsurvival.util.MathUtil;
-import com.reasure.zomsurvival.util.MonsterUtil;
 import com.reasure.zomsurvival.util.SpawnUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -48,7 +47,6 @@ public class SpawnMonsterCommand {
             source.sendFailure(Component.literal("Fail to spawn " + monsterType.getDescriptionId()));
             return -1;
         }
-        MonsterUtil.reinforceMonster(level, monster, MathUtil.getDay(level));
         monster.moveTo(pos.x(), pos.y(), pos.z(), level.random.nextFloat() * 360.0f, 0.0f);
         monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), MobSpawnType.COMMAND, null, null);
         if (!level.tryAddFreshEntityWithPassengers(monster)) {

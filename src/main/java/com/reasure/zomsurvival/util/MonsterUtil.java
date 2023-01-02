@@ -1,33 +1,27 @@
 package com.reasure.zomsurvival.util;
 
-import com.mojang.logging.LogUtils;
+import com.reasure.zomsurvival.entity.goal.SetOrBreakBlockGoal;
 import com.reasure.zomsurvival.entity.goal.target.NearestAttackableTargetWithRangeGoal;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
-import org.slf4j.Logger;
 
 import java.util.UUID;
 
 public class MonsterUtil {
     private static final UUID SPEED_MODIFIER_UUID = UUID.fromString("CC9CB0C4-D1CD-4734-B726-3B2653A46EC8");
-    private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void reinforceMonster(ServerLevel level, Monster monster, int day) {
+    public static void reinforceMonster(Monster monster, int day) {
         if (monster instanceof Zombie zombie) {
-            if (day >= SpawnConfig.ZOMBIE_ADD_FOLLOWING_RANGE_DAY.get()) {
-                reinforceZombieRange(zombie);
-            }
+            reinforceZombieRange(zombie);
             if (day >= SpawnConfig.ZOMBIE_SPEED_UP_PER_DAY.get()) {
                 reinforceZombieSpeed(zombie, day / SpawnConfig.ZOMBIE_SPEED_UP_PER_DAY.get());
             }
+            zombie.goalSelector.addGoal(3, new SetOrBreakBlockGoal(zombie));
         }
     }
 

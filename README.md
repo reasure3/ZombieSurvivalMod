@@ -32,6 +32,7 @@ version: 0.2
 
 * **Zombie Following Range Adder**: 강화할 좀비 인식 사거리
     * 기본값: 200.0
+    * 버그: 청크 로딩 때문에 잘 작동 안함.
 * **Zombie Add Following Range Day**: 인식 사거리를 강화하기 시작하는 일 수
     * 기본값: 0
 
@@ -44,3 +45,5 @@ version: 0.2
     * 기본값: 5
 * **Zombie Max Speed Adder**: 좀비의 기본 속도에서 최대 몇배까지 더할지 설정
     * 기본값: 10.0
+* **Zombie Set Or Break Block Day**: 좀비가 블록을 부수거나 설치하기 시작하는 일수
+    * 기본값: 10

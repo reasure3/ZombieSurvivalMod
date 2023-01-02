@@ -64,18 +64,17 @@ public class SpawnUtil {
 
             Monster monster = getMonsterForSpawn(level, type);
             if (monster == null) continue;
-            spawnGroupData = finalizeSpawn(level, centerX, posY, centerZ, day, spawnGroupData, monster, MobSpawnType.NATURAL);
+            spawnGroupData = finalizeSpawn(level, centerX, posY, centerZ, spawnGroupData, monster);
         }
     }
 
-    public static SpawnGroupData finalizeSpawn(ServerLevel level, double x, double y, double z, int day, SpawnGroupData spawnGroupData, Monster monster, MobSpawnType type) {
-        MonsterUtil.reinforceMonster(level, monster, day);
+    public static SpawnGroupData finalizeSpawn(ServerLevel level, double x, double y, double z, SpawnGroupData spawnGroupData, Monster monster) {
         monster.moveTo(x, y, z, level.random.nextFloat() * 360.0f, 0.0f);
-        Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, x, y, z, null, type);
+        Event.Result res = ForgeEventFactory.canEntitySpawn(monster, level, x, y, z, null, MobSpawnType.NATURAL);
         if (res == Event.Result.DENY) return spawnGroupData;
-        if (res == Event.Result.ALLOW || (monster.checkSpawnRules(level, type) && monster.checkSpawnObstruction(level))) {
-            if (!ForgeEventFactory.doSpecialSpawn(monster, level, (float) x, (float) y, (float) z, null, type)) {
-                spawnGroupData = monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), type, spawnGroupData, null);
+        if (res == Event.Result.ALLOW || (monster.checkSpawnRules(level, MobSpawnType.NATURAL) && monster.checkSpawnObstruction(level))) {
+            if (!ForgeEventFactory.doSpecialSpawn(monster, level, (float) x, (float) y, (float) z, null, MobSpawnType.NATURAL)) {
+                spawnGroupData = monster.finalizeSpawn(level, level.getCurrentDifficultyAt(monster.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
             }
             level.addFreshEntityWithPassengers(monster);
         }
