@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeHooks;
 
 public class SetOrBreakBlockGoal extends Goal {
     protected PathfinderMob mob;
@@ -94,7 +95,7 @@ public class SetOrBreakBlockGoal extends Goal {
                 setActionBreak();
             }
         } else { // 아니라면 자기 앞(또는 옆) 블럭을 부수거나 자기 앞(또는 옆)의 밑에 블럭을 설치. (다리 만들듯이)
-            if (fineNearestBlock()) {
+            if (findNearestBlock()) {
                 if (block.isAir()) {
                     blockInteractTime = 40;
                     action = Action.SET;
@@ -105,11 +106,15 @@ public class SetOrBreakBlockGoal extends Goal {
                 action = Action.NONE;
             }
         }
+
+        if (action == Action.BREAK && !ForgeHooks.canEntityDestroy(mob.level, blockPos, mob)) {
+            action = Action.NONE;
+        }
     }
 
     // 순서: 앞.눈 -> 앞.발 -> 앞.발밑 -> 왼.눈 -> 왼.발 -> 왼.발밑- > 오.눈 -> 오.발 -> 오.발밑
     // 반환: 부술 블록을 찾았는지 여부
-    private boolean fineNearestBlock() {
+    private boolean findNearestBlock() {
         Direction front = mob.getDirection();
         Direction[] checkDirs = {front, front.getCounterClockWise(), front.getClockWise(), front.getOpposite()};
         for (Direction dir : checkDirs) {
