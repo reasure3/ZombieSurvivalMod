@@ -1,15 +1,16 @@
 {
   "homepage": "https://github.com/reasure3/ZombieSurvivalMod/releases",
   "promos": {
-    "1.19.3-latest": "0.3.2-mc1.19.3-forge",
-    "1.19.3-recommended": "0.3.2-mc1.19.3-forge"
+    "1.19.3-latest": "0.3.3-mc1.19.3-forge",
+    "1.19.3-recommended": "0.3.3-mc1.19.3-forge"
   },
   "1.19.3": {
+    "0.3.3-mc1.19.3-forge": "1. Solve crash with zombie breaking block.",
     "0.3.2-mc1.19.3-forge": "1. (Default) After 10 days, zombies start breaking and placing blocks.\n2. Improve zombie spawn algorithm\n3. Add spawnMonster, daytime command\n4. Fixed a bug where the reinforced part of the zombie is reset when reconnecting to the world",
     "0.3.1-mc1.19.3-forge": "1. Zombie speed increases over time\n2.Improve zombie spawn algorithm",
-    "0.3.0-mc1.19.3-forge": "Modify zombie's detection range",
+    "0.3.0-mc1.19.3-forge": "1. Modify zombie's detection range",
     "0.2.2-mc1.19.3-forge": "1. Fixed bug related to zombie spawning amount\n2. Other monsters now spawn as well. You can set the spawn amount in the config.",
-    "0.2.1-mc1.19.3-forge": "Add mod update check",
+    "0.2.1-mc1.19.3-forge": "1. Add mod update check",
     "0.2-mc1.19.3-forge": "1. Adds config files\n2. Sometimes, villager zombies spawn",
     "0.1-mc1.19.3-forge": "initial version"
   }
