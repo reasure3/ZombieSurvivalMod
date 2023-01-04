@@ -12,8 +12,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 
@@ -70,7 +72,7 @@ public class SetOrBreakBlockGoal extends Goal {
         if (blockInteractTime < 0) return false;
         if (isRightTarget()) {
             if (action == Action.SET || action == Action.JUMP_SET)
-                return mob.level.getBlockState(blockPos).isAir();
+                return isValidBlockToBreak(mob.level.getBlockState(blockPos));
             return mob.level.getBlockState(blockPos).is(block.getBlock());
         }
         return false;
@@ -82,11 +84,12 @@ public class SetOrBreakBlockGoal extends Goal {
         if (dy < 0) { // 플레이어가 밑에 있으면 자기 발 밑 블럭을 부숨
             blockPos.set(mob.getBlockX(), mob.getBlockY() - 1, mob.getBlockZ());
             block = mob.level.getBlockState(blockPos);
-            setActionBreak();
+            if (isValidBlockToBreak(block)) setActionBreak();
+            else action = Action.NONE;
         } else if (dy > 1) { // 플레이어가 2칸 위에 있으면 자기 위 블럭을 부수거나 점프하고 자기 자리에 블럭 쌓음
             blockPos.set(mob.getBlockX(), mob.getBlockY() + 2, mob.getBlockZ());
             block = mob.level.getBlockState(blockPos);
-            if (block.isAir()) {
+            if (!isValidBlockToBreak(block)) {
                 blockInteractTime = 30;
                 blockPos.set(mob.blockPosition());
                 action = Action.JUMP_SET;
@@ -96,7 +99,7 @@ public class SetOrBreakBlockGoal extends Goal {
             }
         } else { // 아니라면 자기 앞(또는 옆) 블럭을 부수거나 자기 앞(또는 옆)의 밑에 블럭을 설치. (다리 만들듯이)
             if (findNearestBlock()) {
-                if (block.isAir()) {
+                if (!isValidBlockToBreak(block)) {
                     blockInteractTime = 40;
                     action = Action.SET;
                 } else {
@@ -107,7 +110,7 @@ public class SetOrBreakBlockGoal extends Goal {
             }
         }
 
-        if (action == Action.BREAK && !ForgeHooks.canEntityDestroy(mob.level, blockPos, mob)) {
+        if ((action == Action.BREAK || action == Action.BREAK_INSTANCE) && !ForgeHooks.canEntityDestroy(mob.level, blockPos, mob)) {
             action = Action.NONE;
         }
     }
@@ -120,13 +123,13 @@ public class SetOrBreakBlockGoal extends Goal {
         for (Direction dir : checkDirs) {
             blockPos.set(mob.getBlockX() + dir.getStepX(), mob.getBlockY() + 1, mob.getBlockZ() + dir.getStepZ());
             block = mob.level.getBlockState(blockPos);
-            if (!block.isAir()) return true;
-            blockPos.set(mob.getBlockX() + dir.getStepX(), mob.getY(), mob.getBlockZ() + dir.getStepZ());
+            if (isValidBlockToBreak(block)) return true;
+            blockPos.set(mob.getBlockX() + dir.getStepX(), mob.getBlockY(), mob.getBlockZ() + dir.getStepZ());
             block = mob.level.getBlockState(blockPos);
-            if (!block.isAir()) return true;
-            blockPos.set(mob.getBlockX() + dir.getStepX(), mob.getY() - 1, mob.getBlockZ() + dir.getStepZ());
+            if (isValidBlockToBreak(block)) return true;
+            blockPos.set(mob.getBlockX() + dir.getStepX(), mob.getBlockY() - 1, mob.getBlockZ() + dir.getStepZ());
             block = mob.level.getBlockState(blockPos);
-            if (block.isAir()) return true;
+            if (!isValidBlockToBreak(block)) return true;
         }
         return false;
     }
@@ -134,12 +137,13 @@ public class SetOrBreakBlockGoal extends Goal {
     private void setActionBreak() {
         breakTime = getBlockBreakTick();
         blockInteractTime = breakTime;
-        action = Action.BREAK;
+        if (breakTime == 0) action = Action.BREAK_INSTANCE;
+        else if (breakTime < 0) action = Action.NONE;
+        else action = Action.BREAK;
     }
 
     @Override
     public void tick() {
-        blockInteractTime--;
         if (action == Action.BREAK) {
             if (mob.level.random.nextInt(10) == 0 && !mob.swinging) {
                 mob.swing(mob.getUsedItemHand());
@@ -147,31 +151,38 @@ public class SetOrBreakBlockGoal extends Goal {
             // 블록을 부수는 중
             int progress = (int) ((float) (breakTime - blockInteractTime) / (float) breakTime * 10.0f);
             if (progress != lastProgress) {
-                mob.level.destroyBlockProgress(mob.getId(), blockPos, progress);
+                mob.level.destroyBlockProgress(mob.getId(), blockPos.immutable(), progress);
                 lastProgress = progress;
             }
         }
         // 해당 목표가 끝나감
         if (blockInteractTime == 0) {
-            if (action == Action.BREAK) {
+            if (action == Action.BREAK_INSTANCE || action == Action.BREAK) {
                 // 블록을 다 부숨
                 block = mob.level.getBlockState(blockPos); // 혹시 모를 버그를 위해 다시 블록 가져오기
-                mob.level.removeBlock(blockPos, false);
                 BlockEntity blockEntity = block.hasBlockEntity() ? mob.level.getBlockEntity(blockPos) : null;
+                mob.level.removeBlock(blockPos, false);
+                // this.mob.level.levelEvent(1021, blockPos, 0);
+                this.mob.level.levelEvent(2001, blockPos, Block.getId(mob.level.getBlockState(blockPos)));
                 Block.dropResources(block, mob.level, blockPos, blockEntity, mob, mob.getMainHandItem());
             } else if (action == Action.JUMP_SET) {
                 // 블록을 설치하기 전에 점프
                 mob.getJumpControl().jump();
             }
         }
+        blockInteractTime--;
     }
 
     @Override
     public void stop() {
         if (action == Action.BREAK)
-            mob.level.destroyBlockProgress(mob.getId(), blockPos, -1);
-        else if (action == Action.SET || action == Action.JUMP_SET)
+            mob.level.destroyBlockProgress(mob.getId(), blockPos.immutable(), -1);
+        else if (action == Action.SET || action == Action.JUMP_SET) {
+            block = mob.level.getBlockState(blockPos);
             mob.level.setBlockAndUpdate(blockPos, Blocks.DIRT.defaultBlockState());
+            mob.level.sendBlockUpdated(blockPos, block, Blocks.DIRT.defaultBlockState(), 11);
+            mob.level.gameEvent(mob, GameEvent.BLOCK_PLACE, blockPos);
+        }
         action = Action.NONE;
         blockInteractTime = -1;
         lastProgress = -1;
@@ -181,6 +192,8 @@ public class SetOrBreakBlockGoal extends Goal {
     }
 
     protected int getBlockBreakTick() {
+        float destroySpeed = block.getDestroySpeed(mob.level, blockPos);
+        if (destroySpeed < 0) return -1;
         float speedMultiplier = 1.0f;
         ItemStack handTool = mob.getMainHandItem();
         boolean correctTool = !handTool.isEmpty() && handTool.isCorrectToolForDrops(block);
@@ -188,10 +201,14 @@ public class SetOrBreakBlockGoal extends Goal {
             speedMultiplier = handTool.getDestroySpeed(block);
             speedMultiplier += MathUtil.pow(handTool.getEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY)) + 1;
         }
-        float damage = speedMultiplier / block.getDestroySpeed(mob.level, blockPos);
+        float damage = speedMultiplier / destroySpeed;
         damage /= correctTool ? 100 : 30;
         if (damage > 1) return 0;
         return Math.round(1.0f / damage);
+    }
+
+    protected boolean isValidBlockToBreak(BlockState block) {
+        return !block.isAir() && !(block.getBlock() instanceof LiquidBlock);
     }
 
     protected boolean isRightTarget() {
@@ -202,6 +219,7 @@ public class SetOrBreakBlockGoal extends Goal {
         JUMP_SET, // 점프 후 블럭 설치
         SET, // 블럭 설치
         BREAK, // 블럭 부숨
+        BREAK_INSTANCE,
         NONE
     }
 }

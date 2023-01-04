@@ -21,6 +21,7 @@ public class MonsterUtil {
             if (day >= SpawnConfig.ZOMBIE_SPEED_UP_PER_DAY.get()) {
                 reinforceZombieSpeed(zombie, day / SpawnConfig.ZOMBIE_SPEED_UP_PER_DAY.get());
             }
+            zombie.targetSelector.removeAllGoals(goal -> goal instanceof SetOrBreakBlockGoal);
             zombie.goalSelector.addGoal(3, new SetOrBreakBlockGoal(zombie));
         }
     }
